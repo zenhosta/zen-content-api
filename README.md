@@ -25,13 +25,13 @@ It is useful for frontend integrations, mobile apps, external websites, headless
 
 - WordPress 5.0 or newer.
 - PHP 7.4 or newer.
-- WordPress permalinks for `/api` aliases.
+- WordPress permalinks set to `Post name` for `/api` aliases.
 
 ## Installation
 
 1. Upload this plugin folder to `/wp-content/plugins/zen-content-api`.
 2. Activate `Zen Content API` from the WordPress Plugins screen.
-3. Open `Settings > Permalinks` and click `Save Changes` to refresh rewrite rules.
+3. Open `Settings > Permalinks`, select `Post name`, and click `Save Changes` to refresh rewrite rules.
 4. Open `/api/docs` or `/wp-json/content/v1/docs` to view API documentation.
 
 ## Base URLs
@@ -54,7 +54,7 @@ Pretty URL alias:
 https://example.com/api
 ```
 
-The `/api` alias requires active WordPress permalinks and working server rewrite rules.
+The `/api` alias requires WordPress permalinks set to `Post name` and working server rewrite rules. If permalinks are set to `Plain`, use the native `/wp-json/content/v1` endpoints or `?rest_route=/content/v1` fallback instead.
 
 ## Endpoints
 

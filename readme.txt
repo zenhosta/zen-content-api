@@ -50,7 +50,7 @@ Pretty URL alias:
 
 `https://example.com/api`
 
-Note: the `/api` alias requires active WordPress permalinks and working server rewrite rules.
+Note: the `/api` alias requires WordPress permalinks set to `Post name` and working server rewrite rules. If permalinks are set to `Plain`, use the native `/wp-json/content/v1` endpoints or the `?rest_route=/content/v1` fallback instead.
 
 == Available Endpoints ==
 
@@ -233,7 +233,7 @@ If HTML from the `content` field is rendered in a frontend, make sure only trust
 
 1. Upload the plugin folder to `/wp-content/plugins/`.
 2. Activate the plugin through the WordPress Plugins screen.
-3. Open Settings > Permalinks and click Save Changes to refresh rewrite rules.
+3. Open Settings > Permalinks, select Post name, and click Save Changes to refresh rewrite rules.
 4. Access API documentation at `/api/docs` or `/wp-json/content/v1/docs`.
 
 == Frequently Asked Questions ==
@@ -244,7 +244,7 @@ No. All endpoints are public and only return published content.
 
 = Why does the /api URL not work? =
 
-Make sure WordPress permalinks are active. Open Settings > Permalinks and click Save Changes. If it still does not work, use the native `/wp-json/content/v1` endpoint or the `?rest_route=/content/v1` fallback.
+Make sure WordPress permalinks are set to Post name. Open Settings > Permalinks, select Post name, and click Save Changes. If it still does not work, use the native `/wp-json/content/v1` endpoint or the `?rest_route=/content/v1` fallback.
 
 = Does this plugin modify posts or categories? =
 
