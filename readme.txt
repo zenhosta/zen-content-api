@@ -4,7 +4,7 @@ Tags: api, rest-api, posts, categories, headless
 Requires at least: 5.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.1.5
+Stable tag: 1.1.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -34,6 +34,7 @@ Main features:
 * Default `per_page` limit of 10 and maximum of 100.
 * Minimum search length of 2 characters.
 * Fallback REST URL support when pretty permalinks are not available.
+* Example responses in API documentation for easier integration.
 
 == Basic Usage ==
 
@@ -171,13 +172,15 @@ Available query parameters:
 
 = API Docs =
 
-Returns endpoint documentation in JSON format.
+Returns endpoint documentation in JSON format, including example responses for each endpoint.
 
 `GET /wp-json/content/v1/docs`
 
 HTML documentation alias:
 
 `GET /api/docs`
+
+The HTML documentation shows native URLs, `/api` aliases, fallback URLs, query parameters, and example responses.
 
 = Plugin Details =
 
@@ -186,6 +189,8 @@ On the WordPress Plugins screen, click `View Details` to open HTML API documenta
 Click `API Docs` to open JSON API documentation.
 
 == Response Data ==
+
+Native `/wp-json` list endpoints return an object with `data` and `pagination` keys. Pretty `/api` list aliases may return the list data array directly.
 
 Post data includes:
 
@@ -251,6 +256,10 @@ No. The plugin only returns posts and pages with `publish` status.
 
 == Changelog ==
 
+= 1.1.6 =
+* Adds example responses to API documentation.
+* Updates HTML API documentation table with response examples.
+
 = 1.1.4 =
 * Adds hardening for public endpoints with default `per_page` 10 and maximum 100.
 * Limits search to at least 2 characters.
@@ -267,6 +276,9 @@ No. The plugin only returns posts and pages with `publish` status.
 * Adds pagination and basic filters on selected endpoints.
 
 == Upgrade Notice ==
+
+= 1.1.6 =
+This version adds example responses to API documentation.
 
 = 1.1.4 =
 This version adds public endpoint hardening and security documentation.

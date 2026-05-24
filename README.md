@@ -19,6 +19,7 @@ It is useful for frontend integrations, mobile apps, external websites, headless
 - Default `per_page` value of `10` and maximum of `100`.
 - Minimum search keyword length of `2` characters.
 - Pretty `/api` URL aliases and native WordPress REST API routes.
+- Example responses in API documentation for easier integration.
 
 ## Requirements
 
@@ -70,6 +71,8 @@ The `/api` alias requires active WordPress permalinks and working server rewrite
 | `GET` | `/wp-json/content/v1/search?s=keyword` | `/api/search?s=keyword` | Search published posts. |
 | `GET` | `/wp-json/content/v1/docs` | `/api/docs` | View API documentation. |
 
+The `/api/docs` HTML page shows native URLs, `/api` aliases, fallback URLs, query parameters, and example responses for every endpoint.
+
 ## Query Parameters
 
 ### Posts
@@ -102,6 +105,8 @@ https://example.com/wp-json/content/v1/posts?page=1&per_page=10
 - `per_page`: Number of posts per page, default `10`, maximum `100`.
 
 ## Response Data
+
+Native `/wp-json` list endpoints return an object with `data` and `pagination` keys. Pretty `/api` list aliases may return the list data array directly.
 
 Post list data includes:
 
@@ -141,7 +146,7 @@ Site data includes basic site metadata such as name, description, URL, language,
 
 ## WordPress Plugin Metadata
 
-- Version: `1.1.5`
+- Version: `1.1.6`
 - Author: `ZenHosta.com`
 - License: `GPL-2.0-or-later`
 - Text domain: `zen-content-api`
