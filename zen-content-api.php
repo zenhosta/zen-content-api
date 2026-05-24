@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Zen Content API
  * Description: Adds reusable public API endpoints for posts, categories, site info, search, and API documentation.
- * Version: 1.1.5
+ * Version: 1.1.6
  * Author: ZenHosta.com
  * Author URI: https://zenhosta.com
  * License: GPL-2.0-or-later
@@ -109,6 +109,7 @@ function webkulo_wp_api_allowed_docs_html() {
 		'h1'       => array(),
 		'p'        => array(),
 		'code'     => array(),
+		'pre'      => array(),
 		'table'    => array(),
 		'thead'    => array(),
 		'tbody'    => array(),
@@ -122,11 +123,11 @@ function webkulo_wp_api_allowed_docs_html() {
 }
 
 function webkulo_wp_api_get_docs_css() {
-	return 'body{font-family:Arial,sans-serif;max-width:1200px;margin:40px auto;padding:0 20px;line-height:1.5;color:#1f2937}code{background:#f3f4f6;padding:2px 5px;border-radius:4px;word-break:break-all}table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border:1px solid #d1d5db;padding:10px;text-align:left;vertical-align:top;word-break:break-word}th{background:#f9fafb}';
+	return 'body{font-family:Arial,sans-serif;max-width:1200px;margin:40px auto;padding:0 20px;line-height:1.5;color:#1f2937}code{background:#f3f4f6;padding:2px 5px;border-radius:4px;word-break:break-all}pre{max-width:420px;margin:0;overflow:auto;background:#111827;color:#f9fafb;padding:12px;border-radius:6px;font-size:12px;line-height:1.45}pre code{background:transparent;color:inherit;padding:0;border-radius:0;word-break:normal}table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border:1px solid #d1d5db;padding:10px;text-align:left;vertical-align:top;word-break:break-word}th{background:#f9fafb}';
 }
 
 function webkulo_wp_api_enqueue_docs_assets() {
-	wp_register_style( 'zen-content-api-docs', false, array(), '1.1.5' );
+	wp_register_style( 'zen-content-api-docs', false, array(), '1.1.6' );
 	wp_enqueue_style( 'zen-content-api-docs' );
 	wp_add_inline_style( 'zen-content-api-docs', webkulo_wp_api_get_docs_css() );
 }
@@ -336,30 +337,118 @@ function webkulo_wp_api_get_site_data() {
 	);
 }
 
+function webkulo_wp_api_get_docs_examples() {
+	$category = array(
+		'id'          => 1,
+		'name'        => 'News',
+		'slug'        => 'news',
+		'description' => 'Latest updates.',
+		'count'       => 12,
+	);
+
+	$post = array(
+		'id'             => 1,
+		'id_posts'       => 1,
+		'title'          => 'Hello World',
+		'slug'           => 'hello-world',
+		'image'          => 'https://example.com/wp-content/uploads/hello-world.jpg',
+		'author'         => 'Admin',
+		'categories'     => array( $category ),
+		'featured_image' => 'https://example.com/wp-content/uploads/hello-world.jpg',
+	);
+
+	$detailed_post = array_merge(
+		$post,
+		array(
+			'date'    => '2026-05-24T10:00:00+00:00',
+			'excerpt' => 'Short post summary.',
+			'content' => '<p>Full post content.</p>',
+		)
+	);
+
+	$list_response = array(
+		'data'       => array( $post ),
+		'pagination' => array(
+			'total'       => 1,
+			'total_pages' => 1,
+			'page'        => 1,
+			'per_page'    => 10,
+		),
+	);
+
+	return array(
+		'/posts'                 => $list_response,
+		'/posts/{id}'            => $detailed_post,
+		'/posts/{id}/{slug}'     => $detailed_post,
+		'/categories'            => array( $category ),
+		'/categories/{id}'       => $category,
+		'/categories/{id}/posts' => $list_response,
+		'/pages'                 => array(
+			'data'       => array(
+				array(
+					'id'      => 2,
+					'title'   => 'About',
+					'slug'    => 'about',
+					'excerpt' => 'About page summary.',
+					'content' => '<p>About page content.</p>',
+				),
+			),
+			'pagination' => array(
+				'total'       => 1,
+				'total_pages' => 1,
+				'page'        => 1,
+				'per_page'    => 10,
+			),
+		),
+		'/site'                  => array(
+			'name'        => 'Example Site',
+			'description' => 'Example site description.',
+			'url'         => 'https://example.com/',
+			'language'    => 'en-US',
+			'logo'        => 'https://example.com/wp-content/uploads/logo.png',
+		),
+		'/search'                => $list_response,
+		'/docs'                  => array(
+			'name'        => 'Zen Content API',
+			'version'     => '1.1.6',
+			'base_url'    => 'https://example.com/wp-json/content/v1',
+			'fallback'    => 'https://example.com/?rest_route=/content/v1',
+			'pretty_alias' => 'https://example.com/api',
+			'endpoints'   => array(),
+		),
+	);
+}
+
 function webkulo_wp_api_get_docs_data() {
 	$base_url     = home_url( '/wp-json/' . WEBKULO_WP_API_NAMESPACE );
 	$fallback_url = home_url( '/?rest_route=/' . WEBKULO_WP_API_NAMESPACE );
 	$alias_url    = home_url( '/api' );
+	$examples     = webkulo_wp_api_get_docs_examples();
+	$endpoints    = array(
+		array( 'method' => 'GET', 'path' => '/posts', 'url' => $base_url . '/posts', 'fallback_url' => $fallback_url . '/posts', 'alias_url' => $alias_url . '/posts', 'query' => array( 'page', 'per_page', 'category', 'search' ) ),
+		array( 'method' => 'GET', 'path' => '/posts/{id}', 'url' => $base_url . '/posts/1', 'fallback_url' => $fallback_url . '/posts/1', 'alias_url' => $alias_url . '/posts/1' ),
+		array( 'method' => 'GET', 'path' => '/posts/{id}/{slug}', 'url' => $base_url . '/posts/1/hello-world', 'fallback_url' => $fallback_url . '/posts/1/hello-world', 'alias_url' => $alias_url . '/posts/1/hello-world' ),
+		array( 'method' => 'GET', 'path' => '/categories', 'url' => $base_url . '/categories', 'fallback_url' => $fallback_url . '/categories', 'alias_url' => $alias_url . '/categories' ),
+		array( 'method' => 'GET', 'path' => '/categories/{id}', 'url' => $base_url . '/categories/1', 'fallback_url' => $fallback_url . '/categories/1', 'alias_url' => $alias_url . '/categories/1' ),
+		array( 'method' => 'GET', 'path' => '/categories/{id}/posts', 'url' => $base_url . '/categories/1/posts', 'fallback_url' => $fallback_url . '/categories/1/posts', 'alias_url' => $alias_url . '/categories/1/posts', 'query' => array( 'page', 'per_page' ) ),
+		array( 'method' => 'GET', 'path' => '/pages', 'url' => $base_url . '/pages', 'fallback_url' => $fallback_url . '/pages', 'alias_url' => $alias_url . '/pages', 'query' => array( 'page', 'per_page' ) ),
+		array( 'method' => 'GET', 'path' => '/site', 'url' => $base_url . '/site', 'fallback_url' => $fallback_url . '/site', 'alias_url' => $alias_url . '/site' ),
+		array( 'method' => 'GET', 'path' => '/search', 'url' => $base_url . '/search?s=keyword', 'fallback_url' => $fallback_url . '/search&s=keyword', 'alias_url' => $alias_url . '/search?s=keyword', 'query' => array( 's', 'page', 'per_page' ) ),
+		array( 'method' => 'GET', 'path' => '/docs', 'url' => $base_url . '/docs', 'fallback_url' => $fallback_url . '/docs', 'alias_url' => $alias_url . '/docs' ),
+	);
+
+	foreach ( $endpoints as $key => $endpoint ) {
+		$endpoints[ $key ]['example_response'] = isset( $examples[ $endpoint['path'] ] ) ? $examples[ $endpoint['path'] ] : null;
+	}
 
 	return array(
 		'name'        => 'Zen Content API',
-		'version'     => '1.1.5',
+		'version'     => '1.1.6',
 		'base_url'    => $base_url,
 		'fallback'    => $fallback_url,
 		'pretty_alias' => $alias_url,
-		'note'        => 'Native /wp-json endpoints are portable after plugin activation. /api aliases require working WordPress rewrites on the server. Public list endpoints use per_page default 10 and max 100. Search requires at least 2 characters.',
-		'endpoints'   => array(
-			array( 'method' => 'GET', 'path' => '/posts', 'url' => $base_url . '/posts', 'fallback_url' => $fallback_url . '/posts', 'alias_url' => $alias_url . '/posts', 'query' => array( 'page', 'per_page', 'category', 'search' ) ),
-			array( 'method' => 'GET', 'path' => '/posts/{id}', 'url' => $base_url . '/posts/1', 'fallback_url' => $fallback_url . '/posts/1', 'alias_url' => $alias_url . '/posts/1' ),
-			array( 'method' => 'GET', 'path' => '/posts/{id}/{slug}', 'url' => $base_url . '/posts/1/hello-world', 'fallback_url' => $fallback_url . '/posts/1/hello-world', 'alias_url' => $alias_url . '/posts/1/hello-world' ),
-			array( 'method' => 'GET', 'path' => '/categories', 'url' => $base_url . '/categories', 'fallback_url' => $fallback_url . '/categories', 'alias_url' => $alias_url . '/categories' ),
-			array( 'method' => 'GET', 'path' => '/categories/{id}', 'url' => $base_url . '/categories/1', 'fallback_url' => $fallback_url . '/categories/1', 'alias_url' => $alias_url . '/categories/1' ),
-			array( 'method' => 'GET', 'path' => '/categories/{id}/posts', 'url' => $base_url . '/categories/1/posts', 'fallback_url' => $fallback_url . '/categories/1/posts', 'alias_url' => $alias_url . '/categories/1/posts', 'query' => array( 'page', 'per_page' ) ),
-			array( 'method' => 'GET', 'path' => '/pages', 'url' => $base_url . '/pages', 'fallback_url' => $fallback_url . '/pages', 'alias_url' => $alias_url . '/pages', 'query' => array( 'page', 'per_page' ) ),
-			array( 'method' => 'GET', 'path' => '/site', 'url' => $base_url . '/site', 'fallback_url' => $fallback_url . '/site', 'alias_url' => $alias_url . '/site' ),
-			array( 'method' => 'GET', 'path' => '/search', 'url' => $base_url . '/search?s=keyword', 'fallback_url' => $fallback_url . '/search&s=keyword', 'alias_url' => $alias_url . '/search?s=keyword', 'query' => array( 's', 'page', 'per_page' ) ),
-			array( 'method' => 'GET', 'path' => '/docs', 'url' => $base_url . '/docs', 'fallback_url' => $fallback_url . '/docs', 'alias_url' => $alias_url . '/docs' ),
-		),
+		'note'        => 'Native /wp-json endpoints are portable after plugin activation. /api aliases require working WordPress rewrites on the server. Public list endpoints use per_page default 10 and max 100. Search requires at least 2 characters. Example responses follow native /wp-json format; /api aliases may return list data arrays directly.',
+		'endpoints'   => $endpoints,
 	);
 }
 
@@ -369,11 +458,12 @@ function webkulo_wp_api_render_docs_html() {
 	$head = webkulo_wp_api_get_docs_head();
 
 	foreach ( $docs['endpoints'] as $endpoint ) {
-		$query = isset( $endpoint['query'] ) ? implode( ', ', $endpoint['query'] ) : '-';
-		$rows .= '<tr><td>' . esc_html( $endpoint['method'] ) . '</td><td><code>' . esc_html( $endpoint['path'] ) . '</code></td><td><a href="' . esc_url( $endpoint['url'] ) . '">' . esc_html( $endpoint['url'] ) . '</a></td><td><a href="' . esc_url( $endpoint['alias_url'] ) . '">' . esc_html( $endpoint['alias_url'] ) . '</a></td><td><code>' . esc_html( $endpoint['fallback_url'] ) . '</code></td><td>' . esc_html( $query ) . '</td></tr>';
+		$query   = isset( $endpoint['query'] ) ? implode( ', ', $endpoint['query'] ) : '-';
+		$example = isset( $endpoint['example_response'] ) ? wp_json_encode( $endpoint['example_response'], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) : '';
+		$rows   .= '<tr><td>' . esc_html( $endpoint['method'] ) . '</td><td><code>' . esc_html( $endpoint['path'] ) . '</code></td><td><a href="' . esc_url( $endpoint['url'] ) . '">' . esc_html( $endpoint['url'] ) . '</a></td><td><a href="' . esc_url( $endpoint['alias_url'] ) . '">' . esc_html( $endpoint['alias_url'] ) . '</a></td><td><code>' . esc_html( $endpoint['fallback_url'] ) . '</code></td><td>' . esc_html( $query ) . '</td><td><pre><code>' . esc_html( $example ) . '</code></pre></td></tr>';
 	}
 
-	return '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Zen Content API Docs</title>' . $head . '</head><body><h1>Zen Content API</h1><p>Base URL native: <code>' . esc_html( $docs['base_url'] ) . '</code></p><p>Fallback tanpa pretty permalink: <code>' . esc_html( $docs['fallback'] ) . '</code></p><p>Alias pretty: <code>' . esc_html( $docs['pretty_alias'] ) . '</code></p><p>' . esc_html( $docs['note'] ) . '</p><table><thead><tr><th>Method</th><th>Path</th><th>Native URL</th><th>Alias /api</th><th>Fallback</th><th>Query</th></tr></thead><tbody>' . $rows . '</tbody></table></body></html>';
+	return '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Zen Content API Docs</title>' . $head . '</head><body><h1>Zen Content API</h1><p>Base URL native: <code>' . esc_html( $docs['base_url'] ) . '</code></p><p>Fallback tanpa pretty permalink: <code>' . esc_html( $docs['fallback'] ) . '</code></p><p>Alias pretty: <code>' . esc_html( $docs['pretty_alias'] ) . '</code></p><p>' . esc_html( $docs['note'] ) . '</p><table><thead><tr><th>Method</th><th>Path</th><th>Native URL</th><th>Alias /api</th><th>Fallback</th><th>Query</th><th>Example Response</th></tr></thead><tbody>' . $rows . '</tbody></table></body></html>';
 }
 
 function webkulo_wp_api_build_posts_query_args_from_request( $request = null ) {
